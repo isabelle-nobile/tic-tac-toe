@@ -1,45 +1,65 @@
-from constants import *
+from copy import deepcopy
 from main import TicTacToe as game
 
-def difficult_ia(board, signe):
-    _, best_move = minimax(board, signe, depth=5, is_maximizing=True)
-    return best_move
+def minimax(board, depth, is_maximizing_player, current_player, ai_player):
+    """
+    Cette fonction implémente l'algorithme Minimax avec élagage Alpha-Bêta pour choisir le meilleur coup
+    à jouer pour l'IA.
+    """
+    # On vérifie si le jeu est terminé ou si on atteint la profondeur maximale
+    if game.check_win(board, ai_player):
+        return 10
+    elif game.check_win(board, current_player):
+        return -10
+    elif game.check_tie(board):
+        return 0
+    elif depth == 0:
+        return 0
+    
+    # On initialise les variables
+    best_score = float('-inf') if is_maximizing_player else float('inf')
+    player = ai_player if is_maximizing_player else current_player
+    
+    # On boucle à travers chaque case vide du plateau
+    for i in range(3):
+        for j in range(3):
+            if board[i][j] == ' ':
+                # On simule le coup
+                board_copy = deepcopy(board)
+                board_copy[i][j] = player
+                
+                # On récursive l'appel à la fonction minimax pour évaluer la valeur de ce coup
+                score = minimax(board_copy, depth-1, not is_maximizing_player, current_player, ai_player)
+                
+                # On met à jour la meilleure valeur
+                if is_maximizing_player:
+                    best_score = max(best_score, score)
+                else:
+                    best_score = min(best_score, score)
+    
+    return best_score
 
-def minimax(board, signe, depth, is_maximizing):
-    if game.has_won(board, CROSS):
-        return (10 - depth, None)
-    elif game.has_won(board, CIRCLE):
-        return (-10 + depth, None)
-    elif game.is_tie(board):
-        return (0, None)
-
-    if depth == 0:
-        return (0, None)
-
-    if is_maximizing:
-        best_score = -float('inf')
-        best_move = None
-        for i in range(9):
-            if i >= len(board):
-                continue
-            if board[i] == EMPTY:
-                # rest of the code
-                board[i] = signe
-                score, _ = minimax(board, signe, depth-1, False)
-                board[i] = EMPTY
+def get_best_move(board, current_player, ai_player):
+    """
+    Cette fonction détermine le meilleur coup à jouer pour l'IA en utilisant l'algorithme Minimax.
+    """
+    best_score = float('-inf')
+    best_move = None
+    
+    # On boucle à travers chaque case vide du plateau
+    for i in range(3):
+        for j in range(3):
+            if board[i][j] == ' ':
+                # On simule le coup
+                board_copy = deepcopy(board)
+                board_copy[i][j] = ai_player
+                
+                # On évalue la valeur de ce coup en appelant la fonction minimax
+                score = minimax(board_copy, 4, False, current_player, ai_player)
+                
+                # On met à jour le meilleur coup
                 if score > best_score:
                     best_score = score
-                    best_move = i
-        return (best_score, best_move)
-    else:
-        best_score = float('inf')
-        best_move = None
-        for i in range(9):
-            if board[i] == EMPTY:
-                board[i] = game.get_opponent(signe)
-                score, _ = minimax(board, signe, depth-1, True)
-                board[i] = EMPTY
-                if score < best_score:
-                    best_score = score
-                    best_move = i
-        return (best_score, best_move)
+                    best_move = (i, j)
+    
+    return best_move
