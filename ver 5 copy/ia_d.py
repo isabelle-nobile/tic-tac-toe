@@ -12,7 +12,7 @@ class Minimax:
             return 10
         elif self.check_win(board, current_player):
             return -10
-        elif self.check_tie(board):
+        elif self.check_tie(board, current_player):
             return 0
         elif depth == 0:
             return 0
@@ -40,7 +40,7 @@ class Minimax:
         
         return best_score
 
-    def get_best_move(board, current_player, ai_player):
+    def get_best_move(self, board, current_player, ai_player):
         """
         Cette fonction détermine le meilleur coup à jouer pour l'IA en utilisant l'algorithme Minimax.
         """
@@ -65,25 +65,29 @@ class Minimax:
         
         return best_move
 
-    def check_win(self):
-        # Check rows
+
+    def check_win(self, board, ai_player):
+    # Check rows
         for row in range(ROWS):
-            if self.board[row][0] != EMPTY and self.board[row][0] == self.board[row][1] == self.board[row][2]:
+            if board[row][0] != EMPTY and board[row][0] == board[row][1] == board[row][2] == ai_player:
                 return True
         # Check columns
         for col in range(COLS):
-            if self.board[0][col] != EMPTY and self.board[0][col] == self.board[1][col] == self.board[2][col]:
+            if board[0][col] != EMPTY and board[0][col] == board[1][col] == board[2][col] == ai_player:
                 return True
         # Check diagonals
-        if self.board[0][0] != EMPTY and self.board[0][0] == self.board[1][1] == self.board[2][2]:
+        if board[0][0] != EMPTY and board[0][0] == board[1][1] == board[2][2] == ai_player:
             return True
-        if self.board[0][2] != EMPTY and self.board[0][2] == self.board[1][1] == self.board[2][0]:
+        if board[0][2] != EMPTY and board[0][2] == board[1][1] == board[2][0] == ai_player:
             return True
         return False
-
-    def check_tie(self):
+    
+    def check_tie(self, board, current_player):
         for row in range(ROWS):
             for col in range(COLS):
-                if self.board[row][col] == EMPTY:
+                if board[row][col] == EMPTY:
                     return False
-        return True
+        return not self.check_win(board, current_player)
+
+
+
