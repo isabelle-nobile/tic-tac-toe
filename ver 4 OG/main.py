@@ -1,9 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from constants import *
-from ia import ia, minimax
-from utils import check_winner
-
+from ia import ia
 
 class TicTacToe:
     def __init__(self):
@@ -11,6 +9,7 @@ class TicTacToe:
         self.root.title("Tic Tac Toe")
         self.canvas = tk.Canvas(self.root, width=WIDTH, height=HEIGHT, bg=BG_COLOR)
         self.canvas.pack()
+        self.create_menu_bar()
         self.draw_lines()
         self.canvas.bind("<Button-1>", self.click_handler)
         self.board = [[EMPTY for _ in range(COLS)] for _ in range(ROWS)]
@@ -19,39 +18,28 @@ class TicTacToe:
         self.ai_player = CIRCLE
         self.root.iconbitmap('icon_tic_tac_toe.ico')
 
-         # Créer un widget menubar
-        menubar = tk.Menu(self.root)
-        self.root.config(menu=menubar)
+    def create_menu_bar(self):
+        menu_bar = tk.Menu(self.root)
+        self.root.config(menu=menu_bar)
 
-        # Créer un menu "Jeu"
-        # https://koor.fr/Python/Tutoriel_Tkinter/tkinter_menu.wp
-        game_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="Jeu", menu=game_menu)
-        game_menu.add_command(label="Relancer le jeu", command=self.reset_game)
-        game_menu.add_command(label="Play vs Player", command=self.start_pvp)
-        game_menu.add_command(label="Play vs AI", command=self.start_pvai)
-        game_menu.add_command(label="Niveau de difficulté", command=self.select_difficulty)  # Ajouter une nouvelle option
+        menu_file = tk.Menu(menu_bar, tearoff=0)
 
-    def select_difficulty(self):
-        # Afficher une boîte de dialogue avec des options de difficulté
-        options = [
-            ("Facile", 1),
-            ("Difficile", 2)
-        ]
-        var = tk.StringVar()
-        var.set(options[0][1])
-        for text, mode in options:
-            tk.Radiobutton(self.root, text=text, variable=var, value=mode).pack(anchor=tk.W)
-        tk.Button(self.root, text="OK", command=lambda: self.set_difficulty(var.get())).pack()
+        # Un menu déroulant dans le menu Difficulty.
+        menu_recent = tk.Menu(menu_file, tearoff=0)
+        menu_recent.add_command(label="Easy")
+        menu_recent.add_command(label="Difficult")
+        menu_file.add_cascade(label="Difficulty", underline=0, menu=menu_recent)
+        menu_bar.add_cascade(label="Play vs AI", underline=0, menu=menu_file)
 
-    def set_difficulty(self, value):
-        # Définir la difficulté sélectionnée par l'utilisateur
-        self.difficulty = int(value)
-        self.root.focus_set()
+        menu_edit = tk.Menu(menu_bar, tearoff=0)
+        menu_edit.add_command(label="PvP", command=self.start_pvp)
+        menu_bar.add_cascade(label="Play vs Player", menu=menu_edit)
 
-    def check_win(self):
-        return check_winner(self.board)
-    
+
+        menu_reset = tk.Menu(menu_bar, tearoff=0)
+        menu_reset.add_command(label="New Game", command=self.reset_game)
+        menu_bar.add_cascade(label="Relancer une partie ?", menu=menu_reset)
+        
     def start_pvp(self):
         self.ai_player = None
         self.reset_game()
@@ -124,21 +112,21 @@ class TicTacToe:
         else:
             self.current_player = CROSS
 
-    # def check_win(self):
-    #     # Check rows
-    #     for row in range(ROWS):
-    #         if self.board[row][0] != EMPTY and self.board[row][0] == self.board[row][1] == self.board[row][2]:
-    #             return True
-    #     # Check columns
-    #     for col in range(COLS):
-    #         if self.board[0][col] != EMPTY and self.board[0][col] == self.board[1][col] == self.board[2][col]:
-    #             return True
-    #     # Check diagonals
-    #     if self.board[0][0] != EMPTY and self.board[0][0] == self.board[1][1] == self.board[2][2]:
-    #         return True
-    #     if self.board[0][2] != EMPTY and self.board[0][2] == self.board[1][1] == self.board[2][0]:
-    #         return True
-    #     return False
+    def check_win(self):
+        # Check rows
+        for row in range(ROWS):
+            if self.board[row][0] != EMPTY and self.board[row][0] == self.board[row][1] == self.board[row][2]:
+                return True
+        # Check columns
+        for col in range(COLS):
+            if self.board[0][col] != EMPTY and self.board[0][col] == self.board[1][col] == self.board[2][col]:
+                return True
+        # Check diagonals
+        if self.board[0][0] != EMPTY and self.board[0][0] == self.board[1][1] == self.board[2][2]:
+            return True
+        if self.board[0][2] != EMPTY and self.board[0][2] == self.board[1][1] == self.board[2][0]:
+            return True
+        return False
 
     def check_tie(self):
         for row in range(ROWS):
@@ -168,10 +156,8 @@ class TicTacToe:
                 self.switch_player()
         else:
             print("Error: AI couldn't make a move")
-        
 
 
 if __name__ == "__main__":
     game = TicTacToe()
     game.root.mainloop()
-

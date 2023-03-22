@@ -1,11 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox
 from constants import *
-from ia import ia, minimax
+from iaclass import *
 from utils import check_winner
 
 
-class TicTacToe:
+class TicTacToeGame:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Tic Tac Toe")
@@ -16,41 +16,33 @@ class TicTacToe:
         self.board = [[EMPTY for _ in range(COLS)] for _ in range(ROWS)]
         self.current_player = CROSS
         self.game_over = False
-        self.ai_player = CIRCLE
+        self.ai_player = None
+        self.ai_difficulty = 2  # Default difficulty is "hard".
         self.root.iconbitmap('icon_tic_tac_toe.ico')
 
-         # Créer un widget menubar
+        # Create a menu bar.
         menubar = tk.Menu(self.root)
         self.root.config(menu=menubar)
 
-        # Créer un menu "Jeu"
-        # https://koor.fr/Python/Tutoriel_Tkinter/tkinter_menu.wp
+        # Create a "Game" menu.
         game_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="Jeu", menu=game_menu)
-        game_menu.add_command(label="Relancer le jeu", command=self.reset_game)
+        menubar.add_cascade(label="Game", menu=game_menu)
+        game_menu.add_command(label="Restart game", command=self.reset_game)
         game_menu.add_command(label="Play vs Player", command=self.start_pvp)
         game_menu.add_command(label="Play vs AI", command=self.start_pvai)
-        game_menu.add_command(label="Niveau de difficulté", command=self.select_difficulty)  # Ajouter une nouvelle option
+        game_menu.add_command(label="Select difficulty", command=self.select_difficulty)
 
     def select_difficulty(self):
-        # Afficher une boîte de dialogue avec des options de difficulté
+        # Show a dialog box with difficulty options.
         options = [
-            ("Facile", 1),
-            ("Difficile", 2)
+            ("Easy", 1),
+            ("Hard", 2)
         ]
         var = tk.StringVar()
-        var.set(options[0][1])
+        var.set(str(self.ai_difficulty))
         for text, mode in options:
             tk.Radiobutton(self.root, text=text, variable=var, value=mode).pack(anchor=tk.W)
         tk.Button(self.root, text="OK", command=lambda: self.set_difficulty(var.get())).pack()
-
-    def set_difficulty(self, value):
-        # Définir la difficulté sélectionnée par l'utilisateur
-        self.difficulty = int(value)
-        self.root.focus_set()
-
-    def check_win(self):
-        return check_winner(self.board)
     
     def start_pvp(self):
         self.ai_player = None
@@ -61,7 +53,7 @@ class TicTacToe:
         self.reset_game()
         if self.current_player == self.ai_player:
             self.ai_move()
-        
+
     def reset_game(self):
         self.board = [[EMPTY for _ in range(COLS)] for _ in range(ROWS)]
         self.current_player = CROSS
@@ -89,7 +81,7 @@ class TicTacToe:
             self.draw_cross(row, col)
         else:
             self.draw_circle(row, col)
-        if self.check_win():
+        if check_winner():
             self.show_win_message()
         elif self.check_tie():
             self.show_tie_message()
@@ -118,60 +110,88 @@ class TicTacToe:
         y2 = (row + 1) * HEIGHT // ROWS - OFFSET
         self.canvas.create_oval(x1, y1, x2, y2, width=CIRCLE_WIDTH, outline=CIRCLE_COLOR)
 
-    def switch_player(self):
-        if self.current_player == CROSS:
-            self.current_player = CIRCLE
-        else:
-            self.current_player = CROSS
-
-    # def check_win(self):
-    #     # Check rows
-    #     for row in range(ROWS):
-    #         if self.board[row][0] != EMPTY and self.board[row][0] == self.board[row][1] == self.board[row][2]:
-    #             return True
-    #     # Check columns
-    #     for col in range(COLS):
-    #         if self.board[0][col] != EMPTY and self.board[0][col] == self.board[1][col] == self.board[2][col]:
-    #             return True
-    #     # Check diagonals
-    #     if self.board[0][0] != EMPTY and self.board[0][0] == self.board[1][1] == self.board[2][2]:
-    #         return True
-    #     if self.board[0][2] != EMPTY and self.board[0][2] == self.board[1][1] == self.board[2][0]:
-    #         return True
-    #     return False
-
-    def check_tie(self):
-        for row in range(ROWS):
-            for col in range(COLS):
-                if self.board[row][col] == EMPTY:
-                    return False
-        return True
-
-    def show_win_message(self):
-        messagebox.showinfo("Game Over", f"{self.current_player} wins!")
-        self.game_over = True
-
-    def show_tie_message(self):
-        messagebox.showinfo("Game Over", "Tie game!")
-        self.game_over = True
-
     def ai_move(self):
-        row, col = ia(self.board, self.ai_player)
-        if row is not False and col is not False:
-            self.board[row][col] = self.ai_player
-            self.draw_circle(row, col)
+        # Check if it's AI's turn and difficulty is set
+        if self.ai_player == self.current_player and hasattr(self, 'difficulty'):
+            if self.difficulty == 1:
+            # Select a random empty cell
+                move = ia(self.board, self.ai_player)
+            elif self.difficulty == 2:
+            # Find the best move using minimax algorithm
+                move = self.find_best_move()
+            else:
+                raise ValueError("Invalid difficulty level")
+                    # Make the move
+        if move:
+            self.board[move[0]][move[1]] = self.ai_player
+            row, col = move
+            if self.ai_player == CROSS:
+                self.draw_cross(row, col)
+            else:
+                self.draw_circle(row, col)
+            
+            # Check if AI has won or game is tied
             if self.check_win():
                 self.show_win_message()
             elif self.check_tie():
                 self.show_tie_message()
             else:
                 self.switch_player()
-        else:
-            print("Error: AI couldn't make a move")
-        
+
+def find_best_move(self):
+    # Find the best move for AI using minimax algorithm
+    scores = []
+    for i in range(3):
+        for j in range(3):
+            if self.board[i][j] == EMPTY:
+                self.board[i][j] = self.ai_player
+                score = minimax(self.board, self.current_player)
+                self.board[i][j] = EMPTY
+                scores.append(score)
+            else:
+                scores.append(None)
+    
+    # Choose the move with the highest score
+    best_score = -2 if self.ai_player == CROSS else 2
+    best_move = None
+    for i in range(len(scores)):
+        if scores[i] is not None:
+            if self.ai_player == CROSS and scores[i] > best_score:
+                best_score = scores[i]
+                best_move = (i // 3, i % 3)
+            elif self.ai_player == CIRCLE and scores[i] < best_score:
+                best_score = scores[i]
+                best_move = (i // 3, i % 3)
+    
+    return best_move
+
+def switch_player(self):
+    # Switch player
+    self.current_player = CROSS if self.current_player == CIRCLE else CIRCLE
+
+def check_tie(self):
+    # Check if the game is tied
+    for row in self.board:
+        for cell in row:
+            if cell == EMPTY:
+                return False
+    return True
+
+def show_win_message(self):
+    # Show message box with the winner
+    winner = self.current_player
+    if winner == CROSS:
+        messagebox.showinfo("Tic Tac Toe", "X a gagné!")
+    else:
+        messagebox.showinfo("Tic Tac Toe", "O a gagné!")
+    self.game_over = True
+
+def show_tie_message(self):
+    # Show message box with tie message
+    messagebox.showinfo("Tic Tac Toe", "Match nul!")
+    self.game_over = True
 
 
 if __name__ == "__main__":
-    game = TicTacToe()
+    game = TicTacToeGame()
     game.root.mainloop()
-
