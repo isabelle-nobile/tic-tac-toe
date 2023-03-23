@@ -1,6 +1,6 @@
 import random
 from constants import *
-from main import TicTacToe as game
+from ver 5 copy 2.main import TicTacToe as game
 
 def ia(board, signe, level):
     if level == "facile":

@@ -1,5 +1,5 @@
 from copy import deepcopy
-from main import TicTacToe as game
+from ver 5 copy 2.main import TicTacToe as game
 
 def minimax(board, depth, is_maximizing_player, current_player, ai_player):
     """

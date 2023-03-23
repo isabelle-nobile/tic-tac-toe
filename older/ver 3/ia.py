@@ -1,6 +1,6 @@
 import random
 from utils import check_winner
-from main import check_tie 
+from ver 5 copy 2.main import check_tie 
 
 
 def ia(board, signe):

@@ -19,9 +19,9 @@
 from tkinter import *
 from tkinter import messagebox
 from tkinter.filedialog import askopenfilename
-from main import *
+from ver 5 copy 2.main import *
 from ia import *
-import main
+import ver 5 copy 2.main as main
 
 class MyWindow():
 
