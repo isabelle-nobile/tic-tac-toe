@@ -3,9 +3,6 @@ from tkinter import messagebox
 from constants import *
 from ia import ia
 from ia_d import Minimax
-# from utils import get_random_move
-
-
 
 class TicTacToe:
     def __init__(self):
@@ -66,21 +63,6 @@ class TicTacToe:
             self.ai_player = Minimax.get_best_move(self.board, self.current_player, self.ai_player)
         if self.current_player == self.ai_player:
             self.ai_move()
-
-    # def start_pvai(self):
-    #     self.reset_game()
-    #     if self.ai_player is None:  # On vérifie si l'IA a été initialisée avec une difficulté
-    #         messagebox.showerror("Error", "Please select the difficulty level first.")
-    #         return
-
-    #     # On change cette condition pour appeler la fonction correspondante à la difficulté choisie
-    #     if self.ai_player.difficulty == 'easy':
-    #         self.init_easy_ai()
-    #     elif self.ai_player.difficulty == 'difficult':
-    #         self.init_difficult_ai()
-        
-    #     if self.current_player == self.ai_player:
-    #         self.ai_move()
         
     def start_pvp(self):
         self.ai_player = None

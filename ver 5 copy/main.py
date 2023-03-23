@@ -2,9 +2,9 @@ import tkinter as tk
 from tkinter import messagebox
 from constants import *
 from ia import ia
-# from ia_d import Minimax
-from ia_d import minimax
-# minimax = Minimax()
+from ia_d import Minimax
+# from ia_d import minimax
+minimax = Minimax()
 
 class TicTacToe:
     def __init__(self):
@@ -19,7 +19,6 @@ class TicTacToe:
         self.current_player = CROSS
         self.game_over = False
         self.ai_player = CIRCLE
-        self.ia_difficulty = None
         self.minimax = minimax
         self.root.iconbitmap('icon_tic_tac_toe.ico')
 
@@ -46,37 +45,24 @@ class TicTacToe:
         menu_bar.add_cascade(label="Relancer une partie ?", menu=menu_reset)
 
     def play_easy(self):
-        self.ia_difficulty = 'easy'
-        self.start_pvai()
+        self.difficulty = 'easy'  # ajout de la difficulté choisie
         event = tk.Event()  # create dummy event object
         event.x = WIDTH // 2  # set x and y to center of the canvas
         event.y = HEIGHT // 2
         self.click_handler(event)  # call click_handler with the dummy event
-
+        self.reset_game()
 
     def play_difficult(self):
-        self.ai_player = CIRCLE
-        self.ia_difficulty = 'difficult'
-        self.start_pvai()
-
+        self.difficulty = 'difficult'  # ajout de la difficulté choisie
+        event = tk.Event()  # create dummy event object
+        event.x = WIDTH // 2  # set x and y to center of the canvas
+        event.y = HEIGHT // 2
+        self.click_handler(event)  # call click_handler with the dummy event
+        self.reset_game()
 
     def start_pvp(self):
         # self.ai_player = None
         self.reset_game()
-
-
-
-    def start_pvai(self, player):
-        if self.ia_difficulty == 'easy':
-            # self.reset_game()
-            self.ai_player = ia(self.board, self.current_player)
-        elif self.ia_difficulty == 'difficult':
-            # self.reset_game()
-            # self.ai_player = self.minimax.get_best_move(self.board, self.current_player, self.ai_player)
-            self.ai_player = minimax(self.board, 0, True)
-        if self.current_player == self.ai_player:
-            self.ai_move()
-
         
     def reset_game(self):
         self.board = [[EMPTY for _ in range(COLS)] for _ in range(ROWS)]
@@ -86,23 +72,6 @@ class TicTacToe:
         self.draw_lines()
         self.ia_difficulty = None
 
-        
-    # def start_pvp(self):
-    #     self.ai_player = None
-    #     self.reset_game()
-        
-    # def start_pvai(self):
-    #     self.ai_player = CIRCLE if self.current_player == CROSS else CROSS
-    #     self.reset_game()
-    #     if self.current_player == self.ai_player:
-    #         self.ai_move()
-        
-    # def reset_game(self):
-    #     self.board = [[EMPTY for _ in range(COLS)] for _ in range(ROWS)]
-    #     self.current_player = CROSS
-    #     self.game_over = False
-    #     self.canvas.delete("all")
-    #     self.draw_lines()
 
     def draw_lines(self):
         for i in range(1, COLS):
@@ -130,8 +99,12 @@ class TicTacToe:
             self.show_tie_message()
         else:
             self.switch_player()
-            if self.current_player == self.ai_player:
-                self.ai_move()
+            if self.difficulty == 'easy' and self.current_player == self.ai_player:
+                self.ai_move_easy()
+            elif self.difficulty == 'difficult' and self.current_player == self.ai_player:
+                self.ai_move_difficult()
+
+
 
     def draw_cross(self, row, col):
         x1 = col * WIDTH // COLS + OFFSET
@@ -190,7 +163,7 @@ class TicTacToe:
         messagebox.showinfo("Game Over", "Tie game!")
         self.game_over = True
 
-    def ai_move(self):
+    def ai_move_easy(self):
         row, col = ia(self.board, self.ai_player)
         if row is not False and col is not False:
             self.board[row][col] = self.ai_player
@@ -204,6 +177,23 @@ class TicTacToe:
 
         else:
             print("Error: AI couldn't make a move")
+    
+    def ai_move_difficult(self):
+        # Determine the best move for AI
+        best_move = self.minimax.get_best_move(self.board, self.current_player, self.ai_player)
+
+        # Update the board and UI
+        self.board[best_move[0]][best_move[1]] = self.ai_player
+        self.draw_circle(best_move[0], best_move[1])
+
+        # Check if the game is over
+        if self.check_win():
+            self.show_win_message()
+        elif self.check_tie():
+            self.show_tie_message()
+        else:
+            self.switch_player()
+
 
 
 if __name__ == "__main__":
