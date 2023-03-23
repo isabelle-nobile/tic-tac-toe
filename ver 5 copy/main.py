@@ -2,8 +2,9 @@ import tkinter as tk
 from tkinter import messagebox
 from constants import *
 from ia import ia
-from ia_d import Minimax
-minimax = Minimax()
+# from ia_d import Minimax
+from ia_d import minimax
+# minimax = Minimax()
 
 class TicTacToe:
     def __init__(self):
@@ -30,7 +31,7 @@ class TicTacToe:
 
         # Un menu déroulant dans le menu Difficulty.
         menu_recent = tk.Menu(menu_file, tearoff=0)
-        menu_recent.add_command(label="Easy")
+        menu_recent.add_command(label="Easy", command=self.play_easy)
         menu_recent.add_command(label="Difficult",  command=self.play_difficult)
         menu_file.add_cascade(label="Difficulty", underline=0, menu=menu_recent)
         menu_bar.add_cascade(label="Play vs AI", underline=0, menu=menu_file)
@@ -47,23 +48,32 @@ class TicTacToe:
     def play_easy(self):
         self.ia_difficulty = 'easy'
         self.start_pvai()
+        event = tk.Event()  # create dummy event object
+        event.x = WIDTH // 2  # set x and y to center of the canvas
+        event.y = HEIGHT // 2
+        self.click_handler(event)  # call click_handler with the dummy event
+
 
     def play_difficult(self):
+        self.ai_player = CIRCLE
         self.ia_difficulty = 'difficult'
         self.start_pvai()
 
+
     def start_pvp(self):
+        # self.ai_player = None
         self.reset_game()
-        self.ai_player = None
 
 
-    def start_pvai(self):
+
+    def start_pvai(self, player):
         if self.ia_difficulty == 'easy':
-            self.reset_game()
+            # self.reset_game()
             self.ai_player = ia(self.board, self.current_player)
         elif self.ia_difficulty == 'difficult':
-            self.reset_game()
-            self.ai_player = self.minimax.get_best_move(self.board, self.current_player, self.ai_player)
+            # self.reset_game()
+            # self.ai_player = self.minimax.get_best_move(self.board, self.current_player, self.ai_player)
+            self.ai_player = minimax(self.board, 0, True)
         if self.current_player == self.ai_player:
             self.ai_move()
 

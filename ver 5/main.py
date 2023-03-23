@@ -48,17 +48,22 @@ class TicTacToe:
     def play_easy(self):
         self.ia_difficulty = 'easy'
         self.start_pvai()
+        self.reset_game()
+
 
     def play_difficult(self):
         self.ia_difficulty = 'difficult'
         self.start_pvai()
+        self.reset_game()
+
 
     def start_pvai(self):
         if self.ia_difficulty == 'easy':
+            self.current_player = CROSS
             self.ai_player = ia(self.board, self.current_player)
         elif self.ia_difficulty == 'difficult':
+            self.current_player = CROSS
             self.ai_player = Minimax.get_best_move(self.board, self.current_player, self.ai_player)
-
         if self.current_player == self.ai_player:
             self.ai_move()
 
@@ -121,6 +126,10 @@ class TicTacToe:
         else:
             self.switch_player()
             if self.current_player == self.ai_player:
+                if self.ia_difficulty == 'easy' and self.current_player == CIRCLE:
+                    return
+                elif self.ia_difficulty == 'difficult' and self.current_player == CIRCLE:
+                    return
                 self.ai_move()
 
     def draw_cross(self, row, col):
