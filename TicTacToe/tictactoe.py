@@ -1,9 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
-from constants import *
-from ia import ia
-from ia_minimax import Minimax
-from ia_monte import MonteCarlo
+from TicTacToe.constants import *
+from TicTacToe.ia import ia
+from TicTacToe.ia_minimax import Minimax
 
 
 class TicTacToe:
@@ -22,27 +21,42 @@ class TicTacToe:
         self.game_over = False
         self.ai_player = CIRCLE
         self.minimax = Minimax()
-        self.monte_carlo = MonteCarlo(10000)
         self.difficulty = None
         self.score_x = 0
         self.score_o = 0
         self.root.iconbitmap('icon_tic_tac_toe.ico')
-
-    def draw_scoreboard(self):
-        self.canvas.create_text(
-            WIDTH // 2, HEIGHT + OFFSET,
-            text=f"Score X: {self.score_x}    Score O: {self.score_o}",
+        self.score_label = tk.Label(
+            self.root,
+            text=f"Score X: {self.score_x}                   Score O: {self.score_o}",
             font=("Arial", 16))
+        self.score_label.pack(side=tk.BOTTOM, pady=5)
 
-    def update_scoreboard(self, winner):
+    def update_score_label(self):
+        """
+        Cette fonction met à jour l'étiquette de score 
+        avec les scores actuels.
+        """
+        self.score_label.config(
+            text=f"Score X: {self.score_x}    Score O: {self.score_o}")
+
+    def update_score(self, winner):
+        """
+        Cette fonction met à jour les scores des joueurs
+        en fonction du gagnant.
+        """
         if winner == CROSS:
             self.score_x += 1
         elif winner == CIRCLE:
             self.score_o += 1
         else:
             pass
+        self.update_score_label()
 
     def create_menu_bar(self):
+        """
+        Cette fonction crée la barre de menu avec les différentes 
+        options pour jouer contre l'IA ou contre un autre joueur.
+        """
         menu_bar = tk.Menu(self.root)
         self.root.config(menu=menu_bar)
 
@@ -50,7 +64,6 @@ class TicTacToe:
         # Un menu déroulant dans le menu Difficulty.
         menu_recent = tk.Menu(menu_file, tearoff=0)
         menu_recent.add_command(label="Easy", command=self.play_easy)
-        menu_recent.add_command(label="Medium",  command=self.play_medium)
         menu_recent.add_command(label="Difficult",  command=self.play_difficult)
         menu_file.add_cascade(label="Difficulty", underline=0, menu=menu_recent)
         menu_bar.add_cascade(label="Play vs AI", underline=0, menu=menu_file)
@@ -64,32 +77,23 @@ class TicTacToe:
         menu_bar.add_cascade(label="Relancer une partie ?", menu=menu_reset)
 
     def play_easy(self):
-        self.difficulty = 'easy'  # ajout de la difficulté choisie
-        event = tk.Event()  # create dummy event object
-        event.x = WIDTH // 2  # set x and y to center of the canvas
+        self.difficulty = 'easy'
+        event = tk.Event()
+        event.x = WIDTH // 2
         event.y = HEIGHT // 2
-        self.click_handler(event)  # call click_handler with the dummy event
-        self.reset_game()
-
-    def play_medium(self):
-        self.difficulty = 'medium'  # ajout de la difficulté choisie
-        event = tk.Event()  # create dummy event object
-        event.x = WIDTH // 2  # set x and y to center of the canvas
-        event.y = HEIGHT // 2
-        self.click_handler(event)  # call click_handler with the dummy event
+        self.click_handler(event)
         self.reset_game()
 
     def play_difficult(self):
-        self.difficulty = 'difficult'  # ajout de la difficulté choisie
-        event = tk.Event()  # create dummy event object
-        event.x = WIDTH // 2  # set x and y to center of the canvas
+        self.difficulty = 'difficult'
+        event = tk.Event()
+        event.x = WIDTH // 2
         event.y = HEIGHT // 2
-        self.click_handler(event)  # call click_handler with the dummy event
+        self.click_handler(event)
         self.reset_game()
 
     def start_pvp(self):
-        # self.ai_player = None
-        self.difficulty = None  # ajout de la difficulté choisie
+        self.difficulty = None
         self.reset_game()
 
     def reset_game(self):
@@ -99,7 +103,7 @@ class TicTacToe:
         self.canvas.delete("all")
         self.draw_lines()
         self.ia_difficulty = None
-        self.draw_scoreboard()
+        self.update_score_label()
 
     def draw_lines(self):
         for i in range(1, COLS):
@@ -112,6 +116,11 @@ class TicTacToe:
                 0, y, WIDTH, y, width=LINE_WIDTH, fill=LINE_COLOR)
 
     def click_handler(self, event):
+        """
+        Cette fonction gère les actions à effectuer lorsqu'un joueur clique sur une case de la grille,
+        comme vérifier si le jeu est terminé, dessiner un symbole sur la grille, changer de joueur, 
+        et appeler la fonction appropriée pour l'IA si le joueur actuel est l'IA.
+        """
         if self.game_over:
             return
         row = event.y // (HEIGHT // ROWS)
@@ -132,11 +141,8 @@ class TicTacToe:
             self.switch_player()
             if self.difficulty == 'easy' and self.current_player == self.ai_player:
                 self.ai_move_easy()
-            elif self.difficulty == 'medium' and self.current_player == self.ai_player:
-                self.ai_move_difficult()
             elif self.difficulty == 'difficult' and self.current_player == self.ai_player:
                 self.ai_move_difficult()
-            self.draw_scoreboard()
 
     def draw_cross(self, row, col):
         x1 = col * WIDTH // COLS + OFFSET
@@ -192,11 +198,12 @@ class TicTacToe:
     def show_win_message(self):
         messagebox.showinfo("Game Over", f"{self.current_player} wins!")
         self.game_over = True
-        self.update_scoreboard(self.current_player)
+        self.update_score(self.current_player)
 
     def show_tie_message(self):
         messagebox.showinfo("Game Over", "Tie game!")
         self.game_over = True
+        self.update_score(None)
 
     def ai_move_easy(self):
         row, col = ia(self.board, self.ai_player)
@@ -209,38 +216,20 @@ class TicTacToe:
                 self.show_tie_message()
             else:
                 self.switch_player()
-                print(self.current_player)
 
         else:
             print("Error: AI couldn't make a move")
 
-    def ai_move_medium(self):
-        # Determine the best move for AI
-        best_move = self.monte_carlo.get_best_move(
-            self.board, self.current_player, self.ai_player)
-
-        # Update the board and UI
-        self.board[best_move[0]][best_move[1]] = self.ai_player
-        self.draw_circle(best_move[0], best_move[1])
-
-        # Check if the game is over
-        if self.check_win():
-            self.show_win_message()
-        elif self.check_tie():
-            self.show_tie_message()
-        else:
-            self.switch_player()
-
     def ai_move_difficult(self):
-        # Determine the best move for AI
+        # Détermine le meilleur mouvement pour l'IA
         best_move = self.minimax.get_best_move(
             self.board, CROSS, self.ai_player)
 
-        # Update the board and UI
+        # Mets a jour le board et UI
         self.board[best_move[0]][best_move[1]] = self.ai_player
         self.draw_circle(best_move[0], best_move[1])
 
-    # Check if the game is over
+    # Check si le jeu est terminé
         if self.check_win():
             self.show_win_message()
         elif self.check_tie():
@@ -248,7 +237,5 @@ class TicTacToe:
         else:
             self.switch_player()
 
-
-if __name__ == "__main__":
-    game = TicTacToe()
-    game.root.mainloop()
+    def start(self):
+        self.root.mainloop()

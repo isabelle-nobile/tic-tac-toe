@@ -1,8 +1,10 @@
 import random
 
+
 def ia(board, signe):
     # Vérification des paramètres
-    if not isinstance(board, list) or len(board) != 3 or not all(isinstance(row, list) and len(row) == 3 for row in board):
+    if not isinstance(board, list) or len(board) != 3 or not all(
+            isinstance(row, list) and len(row) == 3 for row in board):
         return False
     if signe not in ['X', 'O']:
         return False

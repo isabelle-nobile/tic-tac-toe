@@ -1,4 +1,4 @@
-from constants import *
+from TicTacToe.constants import *
 
 
 class Minimax:
@@ -17,7 +17,7 @@ class Minimax:
 
         if self.check_tie(board):
             return 0
-        
+
         if is_maximizing_player:
             player = ai_player
             best_score = float('-inf')
@@ -27,7 +27,9 @@ class Minimax:
                         # On simule le coup
                         board[i][j] = player
                         # On récursive l'appel à la fonction minimax pour évaluer la valeur de ce coup
-                        score = self.minimax(board, depth - 1, not is_maximizing_player,current_player, ai_player)
+                        score = self.minimax(
+                            board, depth - 1, not is_maximizing_player,
+                            current_player, ai_player)
                         # On met à jour la meilleure valeur
                         best_score = max(best_score, score)
                         board[i][j] = ' '
@@ -40,7 +42,9 @@ class Minimax:
                         # On simule le coup
                         board[i][j] = player
                         # On récursive l'appel à la fonction minimax pour évaluer la valeur de ce coup
-                        score = self.minimax(board, depth - 1, not is_maximizing_player,current_player, ai_player)
+                        score = self.minimax(
+                            board, depth - 1, not is_maximizing_player,
+                            current_player, ai_player)
 
                         # On met à jour la meilleure valeur
 
@@ -69,7 +73,6 @@ class Minimax:
                     # On met à jour le meilleur
                     board[i][j] = ' '
                     if score > best_score:
-                        print(score)
                         best_score = score
                         best_move = (i, j)
 
@@ -78,7 +81,6 @@ class Minimax:
     def check_win(self, board, current_player, ai_player):
         # Check rows
         for row in range(ROWS):
-            if board[row][0]  == board[row][1] == board[row][2] and  board[row][0] ==ai_player:
             if board[row][0] != EMPTY and board[row][0] == board[row][1] == board[row][2]:
                 if board[row][0] == ai_player:
                     return 10
@@ -102,18 +104,11 @@ class Minimax:
                 return 10
             elif board[0][2] == current_player:
                 return -10
-        # Check if the game is a tie
+        # Check si le jeu est une égalité
         if self.check_tie(board):
             return 0
-        # If the game is not over yet, return None
+        # Si le jeu n'est pas terminé, return None
         return None
-
-    # def check_tie(self, board, current_player,ai_player):
-    #     for row in range(ROWS):
-    #         for col in range(COLS):
-    #             if board[row][col] == EMPTY:
-    #                 return False
-    #     return not self.check_win(board, current_player,ai_player)
 
     def check_tie(self, board):
         for row in board:
