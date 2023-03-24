@@ -3,8 +3,9 @@ import copy
 from constants import *
 
 class MinimaxAI:
-    def __init__(self, player=2):
-        self.player = player
+    def __init__(self, ai_player, current_player):
+        self.ai_player = ai_player
+        self.current_player = current_player
 
     def rnd(self, board):
         empty_sqrs = self.get_empty_sqrs(board)
@@ -29,7 +30,7 @@ class MinimaxAI:
 
             for (row, col) in empty_sqrs:
                 temp_board = copy.deepcopy(board)
-                temp_board = self.mark_sqr(row, col, 1, temp_board) # for maximizing player 1
+                temp_board = self.mark_sqr(row, col, self.ai_player, temp_board) # for maximizing player
                 eval = self.minimax(temp_board, False)[0]
                 if eval > max_eval:
                     max_eval = eval
@@ -44,7 +45,7 @@ class MinimaxAI:
 
             for (row, col) in empty_sqrs:
                 temp_board = copy.deepcopy(board)
-                temp_board = self.mark_sqr(row, col, self.player, temp_board) # for minimizing player 2
+                temp_board = self.mark_sqr(row, col, self.current_player, temp_board) # for minimizing player
                 eval = self.minimax(temp_board, True)[0]
                 if eval < min_eval:
                     min_eval = eval
@@ -54,13 +55,36 @@ class MinimaxAI:
 
 
     def eval(self, main_board):
-    # Minimax algo choice
-        if self.player == 1:  # maximizing player goes first
+    # If it's the first move, make a random move
+        if self.isfull(main_board):
+            return self.rnd(main_board)
+
+        # Get the current player
+        player = self.current_player if self.current_player == CROSS else CIRCLE
+
+        # If it's the current player's turn, let them make a move and return the move
+        if player == self.ai_player:
             _, move = self.minimax(main_board, True)
+            return move
+
+        # If it's the AI player's turn, use the minimax algorithm to find the best move for the AI player and return the move
+        elif player == self.current_player:
+            move = self.rnd(main_board)
+            max_eval = -100
+            empty_sqrs = self.get_empty_sqrs(main_board)
+            for (row, col) in empty_sqrs:
+                temp_board = copy.deepcopy(main_board)
+                temp_board = self.mark_sqr(row, col, self.ai_player, temp_board)
+                eval = self.minimax(temp_board, False)[0]
+                if eval > max_eval:
+                    max_eval = eval
+                    move = (row, col)
+            return move
+
+        # If it's the other player's turn, let them make a move and return the move
         else:
-            _, move = self.minimax(main_board, False)
-            
-        return move
+            return self.rnd(main_board)
+
 
 
     def get_empty_sqrs(self, board):
@@ -112,3 +136,4 @@ class MinimaxAI:
     
     def mark_sqr(self, row, col, mark, board):
         board[row][col] = mark
+        return board

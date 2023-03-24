@@ -1,8 +1,6 @@
 from copy import deepcopy
 from constants import *
 
-# self.ai_player = self.player1 if self.current_player == self.player2 else self.player2
-
 class Minimax:
     def minimax(self, board, depth, is_maximizing_player, current_player, ai_player):
         """

@@ -2,10 +2,8 @@ import tkinter as tk
 from tkinter import messagebox
 from constants import *
 from ia import ia
-# from ia_d import Minimax
-# from minimax import Minimax
-# from minimax2 import minimax_ia
-from minimaxAI import MinimaxAI
+import random
+
 
 class TicTacToe:
     def __init__(self):
@@ -20,9 +18,8 @@ class TicTacToe:
         self.current_player = CROSS
         self.game_over = False
         self.ai_player = CIRCLE
-        self.ai = MinimaxAI(player=self.ai_player)
-
-        # self.minimax = Minimax(player=self.current_player, opponent=self.ai_player)
+        self.difficulty = None
+        self.max_depth = 6
         self.root.iconbitmap('icon_tic_tac_toe.ico')
 
     def create_menu_bar(self):
@@ -64,7 +61,6 @@ class TicTacToe:
         self.reset_game()
 
     def start_pvp(self):
-        # self.ai_player = None
         self.difficulty = None
         self.reset_game()
         
@@ -106,8 +102,9 @@ class TicTacToe:
             if self.difficulty == 'easy' and self.current_player == self.ai_player:
                 self.ai_move_easy()
             elif self.difficulty == 'difficult' and self.current_player == self.ai_player:
-                # self.ai_move_difficult()
-                self.choose_move_with_minimax()
+                # function to the difficul ia 
+                self.ai_move_difficult()
+            
 
 
 
@@ -179,19 +176,79 @@ class TicTacToe:
                 self.show_tie_message()
             else:
                 self.switch_player()
+
         else:
             print("Error: AI couldn't make a move")
 
+    def ai_move_difficult(self):
+        best_score = float("-inf")
+        best_move = None
+        alpha = float("-inf")
+        beta = float("inf")
+        for i in range(ROWS):
+            for j in range(COLS):
+                if self.board[i][j] == EMPTY:
+                    self.board[i][j] = self.ai_player
+                    score = self.minimax(0, False, alpha, beta)
+                    self.board[i][j] = EMPTY
+                    if score > best_score:
+                        best_score = score
+                        best_move = (i, j)
+                    alpha = max(alpha, best_score)
+                    if beta <= alpha:
+                        break
+        row, col = best_move
+        self.board[row][col] = self.ai_player
+        self.draw_circle(row, col)
+        if self.check_win():
+            self.show_win_message()
+        elif self.check_tie():
+            self.show_tie_message()
+        else:
+            self.switch_player()
 
-    # def ai_move_difficult(self):
+    def minimax(self, depth, is_maximizing, alpha, beta):
+        if depth == self.max_depth:
+            return 0
 
-    #     row, col = minimax_ia(self.board, self.ai_player)
-    #     self.board[row][col] = self.ai_player
-    #     return row, col
+        if self.check_win():
+            if self.current_player == self.ai_player:
+                return 1
+            else:
+                return -1
+        elif self.check_tie():
+            return 0
 
-    def choose_move_with_minimax(self, player=2):
-        ai = MinimaxAI(player=player)
-        return ai.eval(self.board)
+        if is_maximizing:
+            best_score = float("-inf")
+            possible_moves = [(i, j) for i in range(ROWS) for j in range(COLS) if self.board[i][j] == EMPTY]
+            random.shuffle(possible_moves)
+            for i, j in possible_moves:
+                self.board[i][j] = self.ai_player
+                score = self.minimax(depth + 1, False, alpha, beta)
+                self.board[i][j] = EMPTY
+                best_score = max(score, best_score)
+                alpha = max(alpha, best_score)
+                if beta <= alpha:
+                    break
+            return best_score
+        else:
+            best_score = float("inf")
+            possible_moves = [(i, j) for i in range(ROWS) for j in range(COLS) if self.board[i][j] == EMPTY]
+            random.shuffle(possible_moves)
+            for i, j in possible_moves:
+                self.board[i][j] = self.current_player
+                score = self.minimax(depth + 1, True, alpha, beta)
+                self.board[i][j] = EMPTY
+                best_score = min(score, best_score)
+                beta = min(beta, best_score)
+                if beta <= alpha:
+                    break
+            return best_score
+
+
+
+
 
 
 

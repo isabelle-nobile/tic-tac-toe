@@ -20,6 +20,6 @@ CIRCLE_WIDTH = 10
 
 # --- COLORS ---
 BG_COLOR = 'white'
-LINE_COLOR = 'black'
-CIRCLE_COLOR = 'blue'
-CROSS_COLOR = 'red'
+LINE_COLOR = 'gray'
+CIRCLE_COLOR = 'red'
+CROSS_COLOR = 'black'

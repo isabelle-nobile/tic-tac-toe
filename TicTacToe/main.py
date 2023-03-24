@@ -3,8 +3,8 @@ from tkinter import messagebox
 from constants import *
 from ia import ia
 from ia_d import Minimax
-# from ia_d import minimax
-minimax = Minimax()
+from ia_monte import MonteCarlo
+
 
 class TicTacToe:
     def __init__(self):
@@ -19,7 +19,9 @@ class TicTacToe:
         self.current_player = CROSS
         self.game_over = False
         self.ai_player = CIRCLE
-        self.minimax = minimax
+        self.minimax = Minimax()
+        self.monte_carlo = MonteCarlo(10000)
+        self.difficulty = None
         self.root.iconbitmap('icon_tic_tac_toe.ico')
 
     def create_menu_bar(self):
@@ -31,6 +33,7 @@ class TicTacToe:
         # Un menu déroulant dans le menu Difficulty.
         menu_recent = tk.Menu(menu_file, tearoff=0)
         menu_recent.add_command(label="Easy", command=self.play_easy)
+        menu_recent.add_command(label="Medium",  command=self.play_medium)
         menu_recent.add_command(label="Difficult",  command=self.play_difficult)
         menu_file.add_cascade(label="Difficulty", underline=0, menu=menu_recent)
         menu_bar.add_cascade(label="Play vs AI", underline=0, menu=menu_file)
@@ -46,6 +49,14 @@ class TicTacToe:
 
     def play_easy(self):
         self.difficulty = 'easy'  # ajout de la difficulté choisie
+        event = tk.Event()  # create dummy event object
+        event.x = WIDTH // 2  # set x and y to center of the canvas
+        event.y = HEIGHT // 2
+        self.click_handler(event)  # call click_handler with the dummy event
+        self.reset_game()
+
+    def play_medium(self):
+        self.difficulty = 'medium'  # ajout de la difficulté choisie
         event = tk.Event()  # create dummy event object
         event.x = WIDTH // 2  # set x and y to center of the canvas
         event.y = HEIGHT // 2
@@ -101,6 +112,8 @@ class TicTacToe:
             self.switch_player()
             if self.difficulty == 'easy' and self.current_player == self.ai_player:
                 self.ai_move_easy()
+            elif self.difficulty == 'medium' and self.current_player == self.ai_player:
+                self.ai_move_difficult()
             elif self.difficulty == 'difficult' and self.current_player == self.ai_player:
                 self.ai_move_difficult()
 
@@ -177,6 +190,22 @@ class TicTacToe:
 
         else:
             print("Error: AI couldn't make a move")
+
+    def ai_move_medium(self):
+        # Determine the best move for AI
+        best_move = self.monte_carlo.get_best_move(self.board, self.current_player, self.ai_player)
+
+        # Update the board and UI
+        self.board[best_move[0]][best_move[1]] = self.ai_player
+        self.draw_circle(best_move[0], best_move[1])
+
+        # Check if the game is over
+        if self.check_win():
+            self.show_win_message()
+        elif self.check_tie():
+            self.show_tie_message()
+        else:
+            self.switch_player()
     
     def ai_move_difficult(self):
         # Determine the best move for AI
